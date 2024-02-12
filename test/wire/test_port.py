@@ -1,7 +1,5 @@
 import pytest
-from sim8bit.net import Net, ShortError
-from sim8bit.pin import Pin
-from sim8bit.port import Port
+from sim8bit.wire import Net, Pin, Port, ShortError
 
 
 def test_port():
@@ -12,6 +10,11 @@ def test_port():
     uut_reading.float_()
     uut_writing.write(42)
     assert uut_reading.value == 42
+
+
+def test_port_len():
+    uut = Port([Pin(Net()) for _ in range(8)])
+    assert len(uut) == 8
 
 
 def test_conflicting_writes_raises_short():
