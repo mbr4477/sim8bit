@@ -1,12 +1,21 @@
 import abc
-from ..wire import Port, Pin
+from typing import Optional
+
+from ..wire import Pin, Port
 
 
 class ReadableMemory(metaclass=abc.ABCMeta):
-    def read_enable(self) -> Pin: ...
-    def addr(self) -> Port: ...
-    def data(self) -> Port: ...
+    def __init__(
+        self, addr: Port, data: Port, output_enable_inv: Pin, image: dict[int, int]
+    ): ...
 
 
 class ReadWriteMemory(ReadableMemory):
-    def write_enable(self) -> Pin: ...
+    def __init__(
+        self,
+        addr: Port,
+        data: Port,
+        output_enable_inv: Pin,
+        write_enable_inv: Pin,
+        image: Optional[dict[int, int]] = None,
+    ): ...

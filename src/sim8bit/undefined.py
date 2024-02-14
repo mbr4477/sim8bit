@@ -1,0 +1,2 @@
+class UndefinedBehavior(RuntimeError):
+    pass
