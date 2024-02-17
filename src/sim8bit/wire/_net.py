@@ -1,59 +1,80 @@
 import abc
-
-from ._pin_state import PinState
+import enum
+import itertools
 from typing import Callable
 
 
-class ShortError(RuntimeError):
-    pass
+class InvalidHandle(RuntimeError): ...
 
 
-class NetMember(metaclass=abc.ABCMeta): ...
+class HandleNotOwner(RuntimeError): ...
 
 
-class PinStateListener(metaclass=abc.ABCMeta):
-    def notify_changed(self, state: PinState): ...
+class NetState(enum.Enum):
+    LOW = 1
+    HIGH = 2
+    FLOATING = 3
 
 
-class PinStateCallback(PinStateListener):
-    def __init__(self, callback: Callable[[PinState], None]):
+class NetChangeListener(metaclass=abc.ABCMeta):
+    def on_change(self, state: NetState): ...
+
+
+class NetChangeCallback(NetChangeListener):
+    def __init__(self, callback: Callable[[NetState], None]):
         super().__init__()
         self._callback = callback
 
-    def notify_changed(self, state: PinState):
+    def on_change(self, state: NetState):
         self._callback(state)
 
 
 class Net:
     def __init__(self):
-        self._members: dict[NetMember, PinState] = {}
-        self._state = PinState.FLOATING
-        self._listeners: list[PinStateListener] = []
+        self._owner = 0
+        self._state = NetState.FLOATING
+        self._listeners: list[NetChangeListener] = []
+        self._handles = itertools.count()
+        _ = next(self._handles)
 
-    def add_listener(self, listener: PinStateListener):
+    def add_listener(self, listener: NetChangeListener):
         self._listeners.append(listener)
 
     @property
-    def state(self) -> PinState:
+    def state(self) -> NetState:
         return self._state
 
-    def notify_changed(self, member: NetMember, state: PinState):
-        self._members[member] = state
+    def _verify_allowed(self, handle: int):
+        if handle != self._owner:
+            raise HandleNotOwner(
+                f"Handle {handle} not allowed to mutate net"
+                + f" owned by {self._owner}."
+            )
 
-        prev_state = self._state
-        states = self._members.values()
-        if PinState.HIGH in states and PinState.LOW in states:
-            raise ShortError
-        elif PinState.HIGH in states:
-            self._state = PinState.HIGH
-        elif PinState.LOW in states:
-            self._state = PinState.LOW
-        else:
-            self._state = PinState.FLOATING
+    def take_high(self, handle: int = 0) -> int:
+        self._verify_allowed(handle)
+        if handle == 0:
+            self._owner = next(self._handles)
+        self._state = NetState.HIGH
+        self._notify_listeners()
+        return self._owner
 
-        if prev_state != self._state:
-            for listener in self._listeners:
-                listener.notify_changed(self._state)
+    def take_low(self, handle: int = 0) -> int:
+        self._verify_allowed(handle)
+        if handle == 0:
+            self._owner = next(self._handles)
+        self._state = NetState.LOW
+        self._notify_listeners()
+        return self._owner
+
+    def release_floating(self, handle: int):
+        self._verify_allowed(handle)
+        self._owner = 0
+        self._state = NetState.FLOATING
+
+    def _notify_listeners(self):
+        for listener in self._listeners:
+            listener.on_change(self._state)
 
 
 Bus = list[Net]
