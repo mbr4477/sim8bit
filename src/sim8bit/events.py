@@ -1,8 +1,13 @@
 from __future__ import annotations
-from typing import Any
-from typing_extensions import Protocol
+
 import dataclasses
+import logging
 import math
+from typing import Any
+
+from typing_extensions import Protocol
+
+_logger = logging.getLogger(__name__)
 
 
 @dataclasses.dataclass
@@ -33,7 +38,7 @@ class Timestamp:
             return NotImplemented
 
         return self.seconds > other.seconds or (
-            self.seconds == other.seconds and self.nanoseconds > other.seconds
+            self.seconds == other.seconds and self.nanoseconds > other.nanoseconds
         )
 
     def __lt__(self, other: Any) -> bool:
@@ -41,7 +46,7 @@ class Timestamp:
             return NotImplemented
 
         return self.seconds < other.seconds or (
-            self.seconds == other.seconds and self.nanoseconds < other.seconds
+            self.seconds == other.seconds and self.nanoseconds < other.nanoseconds
         )
 
     def __ge__(self, other: Any) -> bool:
@@ -83,5 +88,10 @@ class EventScheduler:
 
     def tick(self):
         event = self._events.pop(0)
+        _logger.debug(event)
         self.now = event.stamp
         event.handler(event.stamp)
+
+    @property
+    def empty(self) -> bool:
+        return len(self._events) == 0

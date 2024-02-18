@@ -8,7 +8,7 @@ description = "A simulator for a custom 8-bit computer."
 license = { text = "MIT" }
 requires-python = ">=3.10"
 dynamic = ["version"]
-dependencies = []
+dependencies = ["typing_extensions", "pytest"]
 
 [tool.setuptools.dynamic]
 version = { attr = "sim8bit.__version__" }

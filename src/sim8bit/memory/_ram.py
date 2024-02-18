@@ -56,6 +56,12 @@ class RAM62256LP12(ReadWriteMemory):
 
         self._memory = image or {}
 
+    def peek(self, addr: int) -> int:
+        return self._memory.get(addr, 0)
+
+    def poke(self, addr: int, value: int):
+        self._memory[addr] = value
+
     def _put_output_data_if_ready(self):
         if self._oe_inv.state == NetState.LOW and self._cs_inv.state == NetState.LOW:
             output_ready = True
@@ -105,7 +111,7 @@ class RAM62256LP12(ReadWriteMemory):
         if (
             value == NetState.HIGH
             and self._cs_inv.state == NetState.LOW
-            and self._oe_inv == NetState.HIGH
+            and self._oe_inv.state == NetState.HIGH
         ):
             # Finished possible write pulse, so check the timings
             chip_select_low_time = self._sched.now - self._cs_stamp

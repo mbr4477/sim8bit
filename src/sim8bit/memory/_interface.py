@@ -1,7 +1,7 @@
 import abc
 from typing import Optional
 
-from ..wire import Net, BusMember
+from ..wire import BusMember, Net
 
 
 class ReadableMemory(metaclass=abc.ABCMeta):
@@ -14,6 +14,8 @@ class ReadableMemory(metaclass=abc.ABCMeta):
         image: dict[int, int],
     ): ...
 
+    def peek(self, addr: int) -> int: ...
+
 
 class ReadWriteMemory(ReadableMemory):
     def __init__(
@@ -25,3 +27,5 @@ class ReadWriteMemory(ReadableMemory):
         write_enable_inv: Net,
         image: Optional[dict[int, int]] = None,
     ): ...
+
+    def poke(self, addr: int, value: int): ...
