@@ -135,7 +135,7 @@ def test_ram_read(
     ram_chip: RAM62256LP12,
 ):
     ram_chip.poke(312, 42)
-    
+
     addr = BusMember(addr_bus)
     data = BusMember(data_bus)
     cs_hdl = chip_select.take_high()

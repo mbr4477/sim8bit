@@ -1,31 +1,26 @@
 import abc
-from typing import Optional
-
-from ..wire import BusMember, Net
 
 
-class ReadableMemory(metaclass=abc.ABCMeta):
-    def __init__(
-        self,
-        addr: BusMember,
-        data: BusMember,
-        chip_select_inv: Net,
-        output_enable_inv: Net,
-        image: dict[int, int],
-    ): ...
+class ReadableMemory(metaclass=abc.ABCMeta):  # pragma: nocover
+    """Readable memory."""
 
-    def peek(self, addr: int) -> int: ...
+    def peek(self, addr: int) -> int:
+        """
+        Peek into a memory location.
+
+        :param addr: The address.
+        """
+        ...
 
 
-class ReadWriteMemory(ReadableMemory):
-    def __init__(
-        self,
-        addr: BusMember,
-        data: BusMember,
-        chip_select_inv: Net,
-        output_enable_inv: Net,
-        write_enable_inv: Net,
-        image: Optional[dict[int, int]] = None,
-    ): ...
+class ReadWriteMemory(ReadableMemory):  # pragma: nocover
+    """Read/writeable memory."""
 
-    def poke(self, addr: int, value: int): ...
+    def poke(self, addr: int, value: int):
+        """
+        Set a value at a memory location.
+
+        :param addr: The address.
+        :param value: The value.
+        """
+        ...

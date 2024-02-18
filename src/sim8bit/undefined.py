@@ -1,2 +1,2 @@
 class UndefinedBehavior(RuntimeError):
-    pass
+    """An exception representing undefined hardware behavior."""
