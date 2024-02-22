@@ -4,10 +4,6 @@ import itertools
 from typing import Callable
 
 
-class InvalidHandle(RuntimeError):
-    """An exception for accessing a net with an invalid handle."""
-
-
 class HandleNotOwner(RuntimeError):
     """An exception for accessing a net by a non-owner."""
 
@@ -20,7 +16,7 @@ class NetState(enum.Enum):
     FLOATING = 3
 
 
-class NetChangeListener(metaclass=abc.ABCMeta):
+class NetChangeListener(metaclass=abc.ABCMeta):  # pragma: nocover
     """A net state change listener."""
 
     def on_change(self, state: NetState):
@@ -132,6 +128,7 @@ class Net:
         self._verify_allowed(handle)
         self._owner = 0
         self._state = NetState.FLOATING
+        self._notify_listeners()
 
     def _notify_listeners(self):
         """Notify all the listeners of the net state."""
