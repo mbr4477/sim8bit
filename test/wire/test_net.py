@@ -43,10 +43,7 @@ class TestNet:
     def test_owning_handle_can_make_changes(self):
         uut = Net()
         handle = uut.take_high()
-        try:
-            uut.take_low(handle)
-        except HandleNotOwner:
-            pytest.fail("Unexpected HandleNotOwner error")
+        uut.take_low(handle)
 
     def test_non_owning_handle_causes_handle_not_owner_error(self):
         uut = Net()
@@ -63,11 +60,8 @@ class TestNet:
     def test_release_floating_allows_new_owner(self):
         uut = Net()
         handle = uut.take_high()
-        try:
-            uut.release_floating(handle)
-            _ = uut.take_low()
-        except HandleNotOwner:
-            pytest.fail("Unexpected HandleNotOwner error")
+        uut.release_floating(handle)
+        _ = uut.take_low()
 
     def test_take_high_notifies_all_listeners(self):
         uut = Net()
