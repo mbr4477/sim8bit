@@ -1,5 +1,6 @@
 from sim8bit.events import EventScheduler, Timestamp
 import unittest.mock as mock
+import pytest
 
 
 def test_empty():
@@ -63,3 +64,20 @@ def test_same_timestamps_first_come_first_served():
     uut.tick()
     handler_first.assert_not_called()
     handler_second.assert_called_once_with(stamp_second)
+
+
+def test_now_matches_timestamp_in_handler():
+    stamp = Timestamp(1, 10)
+    uut = EventScheduler()
+
+    def handler(stamp: Timestamp):
+        assert uut.now == stamp
+
+    uut.submit(stamp, handler)
+    uut.tick()
+
+
+def test_now_read_only():
+    uut = EventScheduler()
+    with pytest.raises(AttributeError):
+        uut.now = mock.Mock(0)  # type: ignore

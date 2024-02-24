@@ -13,7 +13,12 @@ class EventScheduler:
     def __init__(self):
         """Create the scheduler."""
         self._events: list[Event] = []
-        self.now = Timestamp()
+        self._now = Timestamp()
+
+    @property
+    def now(self) -> Timestamp:
+        """The current scheduler timestamp."""
+        return self._now
 
     def submit(self, stamp: Timestamp, handler: EventHandler):
         """
@@ -46,7 +51,7 @@ class EventScheduler:
             f"{event.stamp.seconds} sec {event.stamp.nanoseconds}"
             + f" ns -- {event.handler}"
         )
-        self.now = event.stamp
+        self._now = event.stamp
         event.handler(event.stamp)
 
     @property
