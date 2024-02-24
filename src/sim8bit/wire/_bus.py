@@ -1,18 +1,16 @@
 from __future__ import annotations
 
-from typing import Callable, Sequence
+from typing import Callable, Sequence, Union, Literal
 
 from ._net import Net, NetChangeCallback, NetState
 
-
-class BusHasFloatingNet(RuntimeError):
-    """An error for if a bus contains a floating net."""
+BusValue = Union[int, Literal[NetState.FLOATING]]
 
 
 class BusValueListener:  # pragma: nocover
     """A listener for changes in bus value."""
 
-    def on_change(self, value: int):
+    def on_change(self, value: BusValue):
         """
         Handle a value change.
 
@@ -24,7 +22,7 @@ class BusValueListener:  # pragma: nocover
 class BusValueCallback(BusValueListener):
     """A bus value listener that triggers a callback."""
 
-    def __init__(self, callback: Callable[[int], None]):
+    def __init__(self, callback: Callable[[BusValue], None]):
         """
         Create the callback listener.
 
@@ -33,7 +31,7 @@ class BusValueCallback(BusValueListener):
         super().__init__()
         self._callback = callback
 
-    def on_change(self, value: int):
+    def on_change(self, value: BusValue):
         """
         Trigger the callback.
 
@@ -79,16 +77,17 @@ class BusMember:
             listener.on_change(self.value)
 
     @property
-    def value(self) -> int:
+    def value(self) -> BusValue:
         """
         Calculate the value on the bus from the net states.
 
-        :returns: The unsigned integer value on the bus.
+        :returns: The unsigned integer value on the bus or FLOATING.
         """
         out = 0
         for i, x in enumerate(self._nets):
             if x.state == NetState.FLOATING:
-                raise BusHasFloatingNet
+                out = NetState.FLOATING
+                break
             elif x.state == NetState.HIGH:
                 out += 1 << i
         return out

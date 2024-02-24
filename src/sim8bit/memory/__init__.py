@@ -1,3 +1,2 @@
 # flake8: noqa: F401
 from ._interface import ReadableMemory, ReadWriteMemory
-from ._ram import RAM62256LP12

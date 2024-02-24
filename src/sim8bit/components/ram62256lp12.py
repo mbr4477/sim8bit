@@ -1,15 +1,15 @@
 from typing import Optional
 
+from ..events import EventScheduler, Timestamp
+from ..memory import ReadWriteMemory
+from ..error import UndefinedBehavior, FloatingNetError
 from ..wire import (
     BusMember,
-    Net,
-    NetState,
-    NetChangeCallback,
     BusValueCallback,
+    Net,
+    NetChangeCallback,
+    NetState,
 )
-from ._interface import ReadWriteMemory
-from ..undefined import UndefinedBehavior
-from ..events import EventScheduler, Timestamp
 
 
 class RAM62256LP12(ReadWriteMemory):
@@ -101,6 +101,8 @@ class RAM62256LP12(ReadWriteMemory):
             ):
                 output_ready = False
             if output_ready:
+                if self._addr.value == NetState.FLOATING:
+                    raise FloatingNetError
                 self._data.write(self._memory.get(self._addr.value, 0))
 
     def _cs_inv_did_change(self, value: NetState):
@@ -197,7 +199,12 @@ class RAM62256LP12(ReadWriteMemory):
                     "Attempted write with insufficient data stable time"
                 )
 
-            # Valid write
+            # Valid write, but check for valid data.
+            if (
+                self._data.value == NetState.FLOATING
+                or self._addr.value == NetState.FLOATING
+            ):
+                raise FloatingNetError
             self._memory[self._addr.value] = self._data.value
         elif self._cs_inv.state == NetState.HIGH:
             # CS = H, OE = X, WE = X

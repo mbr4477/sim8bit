@@ -1,8 +1,8 @@
-from sim8bit.events import EventScheduler, Timestamp
-from sim8bit.memory import RAM62256LP12
-from sim8bit.undefined import UndefinedBehavior
-from sim8bit.wire import BusMember, Net
 import pytest
+from sim8bit.components.ram62256lp12 import RAM62256LP12
+from sim8bit.events import EventScheduler, Timestamp
+from sim8bit.error import UndefinedBehavior
+from sim8bit.wire import BusMember, Net
 
 
 @pytest.fixture
@@ -54,7 +54,7 @@ def ram_chip(
     )
 
 
-def test_ram_write(
+def test_write(
     sched: EventScheduler,
     addr_bus: list[Net],
     data_bus: list[Net],
@@ -90,7 +90,7 @@ def test_ram_write(
     assert ram_chip.peek(312) == 42
 
 
-def test_ram_write_fails_if_we_pulse_too_short(
+def test_write_fails_if_we_pulse_too_short(
     sched: EventScheduler,
     addr_bus: list[Net],
     data_bus: list[Net],
@@ -125,7 +125,7 @@ def test_ram_write_fails_if_we_pulse_too_short(
             sched.tick()
 
 
-def test_ram_read(
+def test_read(
     sched: EventScheduler,
     addr_bus: list[Net],
     data_bus: list[Net],
